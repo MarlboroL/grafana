@@ -16,6 +16,11 @@ module.exports = async baseConfig => {
       integrationFolder: `${CWD}/cypress/integration`,
       screenshotsFolder: `${CWD}/cypress/screenshots`,
       videosFolder: `${CWD}/cypress/videos`,
+      reporterOptions: {
+        mochajsJsonFileReporterReporterOptions: {
+          output: `${CWD}/cypress/report.json`,
+        },
+      },
     };
 
     const customProjectConfig = await readFile(`${CWD}/cypress.json`, 'utf8')
@@ -46,14 +51,23 @@ module.exports = async baseConfig => {
       .catch(error => {
         if (error.code === 'ENOENT') {
           // File is optional
-          return null;
+          return {};
         } else {
           // Unexpected error
           throw error;
         }
       });
 
-    return { ...baseConfig, ...projectConfig, ...customProjectConfig };
+    return {
+      ...baseConfig,
+      ...projectConfig,
+      ...customProjectConfig,
+      reporterOptions: {
+        ...baseConfig.reporterOptions,
+        ...projectConfig.reporterOptions,
+        ...customProjectConfig.reporterOptions,
+      },
+    };
   } else {
     // Temporary legacy support for Grafana core (using `yarn start`)
     return baseConfig;
